@@ -2,13 +2,14 @@ import Dependencies._
 
 ThisBuild / scalaVersion     := "2.12.8"
 ThisBuild / version          := "0.1.0-SNAPSHOT"
-ThisBuild / organization     := "com.example"
-ThisBuild / organizationName := "example"
+ThisBuild / organization     := "dev.plotsky.scats"
+ThisBuild / organizationName := "PlotskyDev"
 
 lazy val root = (project in file("."))
   .settings(
     name := "scats",
-    libraryDependencies += scalaTest % Test
+    libraryDependencies += scalaTest % Test,
+    libraryDependencies += "joda-time" % "joda-time" % "2.10.5"
   )
 
 // Uncomment the following for publishing to Sonatype.
