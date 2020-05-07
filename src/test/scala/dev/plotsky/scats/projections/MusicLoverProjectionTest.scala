@@ -2,10 +2,13 @@ package dev.plotsky.scats.projections
 
 import java.util.UUID
 
+import dev.plotsky.scats.events.Event
 import dev.plotsky.scats.{Listen, Song}
 import factories.EventFactory
 import org.joda.time.DateTime
 import org.scalatest._
+
+case class TestEvent() extends Event {}
 
 class MusicLoverProjectionTest extends WordSpec with Matchers {
   "MusicLoverProjection" when {
@@ -120,6 +123,19 @@ class MusicLoverProjectionTest extends WordSpec with Matchers {
         )
 
         assert(lover.version == 2)
+      }
+    }
+
+    "given an unknown event" should {
+      val testEvent = TestEvent()
+
+      "increment the version of MusicLover" in {
+        val lover = MusicLoverProjection.buildMusicLover(
+          id,
+          List(testEvent)
+        )
+
+        assert(lover.version == 1)
       }
     }
   }

@@ -2,7 +2,7 @@ package dev.plotsky.scats.projections
 
 import java.util.UUID
 
-import dev.plotsky.scats.{MusicLover, Song}
+import dev.plotsky.scats.{Listen, MusicLover, Song}
 import dev.plotsky.scats.events.{
   Event,
   ListenAdded,
@@ -12,13 +12,7 @@ import dev.plotsky.scats.events.{
 
 object MusicLoverProjection {
   def buildMusicLover(id: UUID, events: List[Event]): MusicLover = {
-    val initial = MusicLover(
-      id = id,
-      initializedAt = None,
-      version = 0,
-      songCounts = Map.empty,
-      listens = Map.empty
-    )
+    val initial = emptyLover(id)
     events.foldLeft(initial)((collector, event) => applyEvent(collector, event))
   }
 
@@ -27,8 +21,18 @@ object MusicLoverProjection {
       case init: MusicLoverInitialized => applyEvent(lover, init)
       case listenAdded: ListenAdded    => applyEvent(lover, listenAdded)
       case removed: ListenRemoved      => applyEvent(lover, removed)
-      case _                           => lover
+      case _                           => applyUnknown(lover, event)
     }
+
+  private def emptyLover(id: UUID): MusicLover = {
+    MusicLover(
+      id = id,
+      initializedAt = None,
+      version = 0,
+      songCounts = Map.empty,
+      listens = Map.empty
+    )
+  }
 
   private def applyEvent(
     lover: MusicLover,
@@ -36,9 +40,16 @@ object MusicLoverProjection {
   ): MusicLover = {
     lover.copy(
       songCounts = subtractSongCount(lover, event.listen.song),
-      listens = lover.listens - event.listen.id,
-      version = lover.version + 1
+      listens = removeListen(lover, event.listen),
+      version = increment(lover.version)
     )
+  }
+
+  private def removeListen(
+    lover: MusicLover,
+    listen: Listen
+  ): Map[String, Listen] = {
+    lover.listens - listen.id
   }
 
   private def applyEvent(
@@ -47,16 +58,33 @@ object MusicLoverProjection {
   ): MusicLover = {
     lover.copy(
       initializedAt = Some(event.initializedAt),
-      version = lover.version + 1
+      version = increment(lover.version)
     )
   }
 
   private def applyEvent(lover: MusicLover, event: ListenAdded): MusicLover = {
     lover.copy(
       songCounts = addSongCount(lover, event.listen.song),
-      listens = lover.listens + (event.listen.id -> event.listen),
-      version = lover.version + 1
+      listens = addListen(lover, event.listen),
+      version = increment(lover.version)
     )
+  }
+
+  private def applyUnknown(lover: MusicLover, event: Event): MusicLover = {
+    lover.copy(
+      version = increment(lover.version)
+    )
+  }
+
+  private def addListen(
+    lover: MusicLover,
+    listen: Listen
+  ): Map[String, Listen] = {
+    lover.listens + (listen.id -> listen)
+  }
+
+  private def increment(version: Int): Int = {
+    version + 1
   }
 
   private def subtractSongCount(
@@ -65,9 +93,9 @@ object MusicLoverProjection {
   ): Map[Song, Int] = {
     val newCount = lover.songCounts(song) - 1
     if (newCount == 0) {
-      lover.songCounts - song
+      removeSong(lover, song)
     } else {
-      lover.songCounts + (song -> newCount)
+      replaceSong(lover, song, newCount)
     }
   }
 
@@ -78,5 +106,17 @@ object MusicLoverProjection {
     } else {
       lover.songCounts + (song -> 1)
     }
+  }
+
+  private def replaceSong(
+    lover: MusicLover,
+    song: Song,
+    count: Int
+  ): Map[Song, Int] = {
+    lover.songCounts + (song -> count)
+  }
+
+  private def removeSong(lover: MusicLover, song: Song): Map[Song, Int] = {
+    lover.songCounts - song
   }
 }
