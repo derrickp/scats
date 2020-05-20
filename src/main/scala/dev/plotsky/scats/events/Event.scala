@@ -1,3 +1,3 @@
 package dev.plotsky.scats.events
 
-abstract class Event {}
+trait Event
