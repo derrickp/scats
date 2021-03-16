@@ -2,3 +2,5 @@
 *.log
 *.metals
 target/
+.idea/
+.bsp/

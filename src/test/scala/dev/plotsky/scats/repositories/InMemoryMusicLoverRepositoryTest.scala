@@ -1,13 +1,13 @@
 package dev.plotsky.scats.repositories
 
 import java.util.UUID
-
 import dev.plotsky.scats.{Listen, Song}
 import factories.EventFactory
 import org.joda.time.DateTime
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class InMemoryMusicLoverRepositoryTest extends WordSpec with Matchers {
+class InMemoryMusicLoverRepositoryTest extends AnyWordSpec with Matchers {
   val id = UUID.randomUUID()
 
   "fetchMusicLover()" when {

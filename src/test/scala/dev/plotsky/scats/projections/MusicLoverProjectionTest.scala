@@ -1,16 +1,16 @@
 package dev.plotsky.scats.projections
 
 import java.util.UUID
-
 import dev.plotsky.scats.events.Event
 import dev.plotsky.scats.{Listen, Song}
 import factories.EventFactory
 import org.joda.time.DateTime
-import org.scalatest._
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
 case class TestEvent() extends Event {}
 
-class MusicLoverProjectionTest extends WordSpec with Matchers {
+class MusicLoverProjectionTest extends AnyWordSpec with Matchers {
   "MusicLoverProjection" when {
     val id = UUID.randomUUID()
 
